@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ad Spend Diagnostic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0c0d11; --surface:#15171e; --surface2:#1b1e27; --border:#262a35;
+    --text:#eceef3; --muted:#a0a4b4; --faint:#6f7484;
+    --amber:#ffb020; --red:#ff5b5b; --redbg:rgba(255,91,91,.10); --redbd:rgba(255,91,91,.32);
+    --green:#33d69a; --greenbg:rgba(51,214,154,.10); --greenbd:rgba(51,214,154,.32);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--ink); color:var(--text);
+    font-family:'Inter',system-ui,sans-serif; line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 500px at 78% -8%, rgba(255,176,32,.07), transparent 60%);
+  }
+  .wrap{max-width:1080px; margin:0 auto; padding:0 24px}
+  h1,h2,h3{font-family:'Space Grotesk',sans-serif; line-height:1.12; letter-spacing:-.01em}
+  strong{color:#fff; font-weight:700}
+  .red{color:var(--red)} .green{color:var(--green)} .amber{color:var(--amber)}
+
+  /* HERO */
+  .hero{padding:52px 0 34px; display:grid; grid-template-columns:1.15fr .85fr; gap:40px; align-items:center}
+  .eyebrow{display:inline-flex; align-items:center; gap:8px; font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--amber)}
+  .eyebrow::before{content:""; width:22px; height:1px; background:var(--amber)}
+  .hero h1{font-size:41px; font-weight:700; margin:16px 0 14px}
+  .hero p.sub{font-size:16.5px; color:var(--muted); max-width:34ch}
+  .hero p.sub b{color:var(--text); font-weight:600}
+  .for{margin-top:18px; font-size:13px; color:var(--faint); letter-spacing:.02em}
+
+  /* SCAN PANEL */
+  .scan{background:linear-gradient(180deg,var(--surface2),var(--surface)); border:1px solid var(--border); border-radius:16px; padding:18px 18px 8px; box-shadow:0 24px 60px -30px rgba(0,0,0,.8)}
+  .scan .head{display:flex; align-items:center; justify-content:space-between; padding-bottom:12px; margin-bottom:6px; border-bottom:1px solid var(--border)}
+  .scan .head span{font-size:11.5px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:var(--faint)}
+  .live{display:inline-flex; align-items:center; gap:7px; font-size:11.5px; color:var(--green); font-weight:600}
+  .live .pulse{width:8px; height:8px; border-radius:50%; background:var(--green); box-shadow:0 0 0 0 rgba(51,214,154,.6); animation:p 2s infinite}
+  @keyframes p{0%{box-shadow:0 0 0 0 rgba(51,214,154,.5)}70%{box-shadow:0 0 0 7px rgba(51,214,154,0)}100%{box-shadow:0 0 0 0 rgba(51,214,154,0)}}
+  .row{display:flex; align-items:center; gap:12px; padding:12px 2px; border-bottom:1px solid rgba(38,42,53,.6)}
+  .row:last-child{border-bottom:0}
+  .dot{width:9px; height:9px; border-radius:50%; flex:none}
+  .dot.r{background:var(--red); box-shadow:0 0 10px rgba(255,91,91,.7)}
+  .dot.g{background:var(--green); box-shadow:0 0 10px rgba(51,214,154,.7)}
+  .row .k{font-size:13px; color:var(--muted); flex:none; width:112px}
+  .row .v{font-size:13.5px; color:var(--text); font-weight:600}
+  .row .v.r{color:var(--red)} .row .v.g{color:var(--green)}
+
+  /* SECTIONS */
+  section{padding:30px 0}
+  .lead{font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--faint); margin-bottom:18px}
+  h2.sec{font-size:27px; font-weight:700; margin-bottom:22px}
+
+  .cards{display:grid; gap:14px}
+  .card{background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--red); border-radius:14px; padding:20px 22px; display:grid; grid-template-columns:1fr auto; gap:6px 26px; align-items:start}
+  .card h3{grid-column:1; font-size:18.5px; font-weight:600; color:var(--red)}
+  .card p{grid-column:1; font-size:15px; color:var(--muted)}
+  .card p b{color:var(--text); font-weight:600}
+  .evi{grid-column:2; grid-row:1 / span 2; align-self:center; background:#0a0b0e; border:1px solid var(--redbd); border-radius:10px; padding:12px 14px; font-family:'JetBrains Mono',monospace; font-size:12px; color:#c7ccd8; min-width:230px}
+  .evi .tag{color:#ff8a8a; word-break:break-all}
+  .evi .more{display:block; margin-top:8px; color:var(--faint); font-size:11px}
+
+  .asset{background:var(--greenbg); border:1px solid var(--greenbd); border-radius:14px; padding:20px 24px; display:flex; align-items:center; gap:20px}
+  .asset .big{font-family:'Space Grotesk',sans-serif; font-size:34px; font-weight:700; color:var(--green); flex:none; line-height:1}
+  .asset .big small{display:block; font-size:12px; color:var(--muted); font-weight:500; letter-spacing:.02em; margin-top:4px}
+  .asset p{font-size:15px; color:var(--text)}
+  .asset p b{color:var(--green)}
+
+  .ba{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+  .col{border:1px solid var(--border); border-radius:14px; padding:20px 22px}
+  .col.today{background:var(--redbg); border-color:var(--redbd)}
+  .col.after{background:var(--greenbg); border-color:var(--greenbd)}
+  .col .lbl{font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; margin-bottom:14px}
+  .col.today .lbl{color:var(--red)} .col.after .lbl{color:var(--green)}
+  .col ul{list-style:none; display:grid; gap:11px}
+  .col li{font-size:14.5px; color:var(--text); padding-left:24px; position:relative}
+  .col li b{font-weight:600}
+  .col.today li::before{content:"\2715"; position:absolute; left:0; top:1px; color:var(--red); font-size:12px; font-weight:700}
+  .col.after li::before{content:"\2713"; position:absolute; left:0; top:0; color:var(--green); font-size:13px; font-weight:700}
+
+  .steps{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+  .step{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px 20px; display:grid; grid-template-columns:auto 1fr; gap:16px; align-items:start}
+  .step .n{font-family:'Space Grotesk',sans-serif; font-size:15px; font-weight:700; color:var(--ink); background:var(--amber); width:30px; height:30px; border-radius:9px; display:grid; place-items:center; flex:none}
+  .step h3{font-size:16px; font-weight:600; margin-bottom:4px}
+  .step p{font-size:14px; color:var(--muted)}
+  .step p b{color:var(--text); font-weight:600}
+
+  .close{margin:14px 0 8px; background:linear-gradient(180deg,var(--surface2),var(--surface)); border:1px solid var(--border); border-radius:16px; padding:32px 34px; display:grid; grid-template-columns:1.45fr .85fr; gap:34px; align-items:center}
+  .close h2{font-size:24px; font-weight:700; margin-bottom:12px}
+  .close p{font-size:15.5px; color:var(--muted)}
+  .close p b{color:var(--amber); font-weight:600}
+  .recap{border-left:1px solid var(--border); padding-left:30px; display:grid; gap:16px}
+  .recap-row{display:flex; align-items:center; gap:14px}
+  .recap-row .rn{font-family:'Space Grotesk',sans-serif; font-size:22px; font-weight:700; width:44px; height:44px; border-radius:11px; display:grid; place-items:center; flex:none}
+  .recap-row .rn.red{color:var(--red); background:var(--redbg); border:1px solid var(--redbd)}
+  .recap-row .rn.green{color:var(--green); background:var(--greenbg); border:1px solid var(--greenbd)}
+  .recap-row span:last-child{font-size:14.5px; color:var(--text); font-weight:500}
+  .recap-note{font-size:13.5px; color:var(--amber); font-weight:600; padding-top:2px}
+  footer{padding:26px 0 46px; color:var(--faint); font-size:12.5px; letter-spacing:.03em; border-top:1px solid var(--border); margin-top:18px}
+
+  @media(max-width:860px){
+    .hero{grid-template-columns:1fr; gap:26px; padding:38px 0 26px}
+    .hero h1{font-size:33px} .hero p.sub{max-width:none}
+    .ba,.steps{grid-template-columns:1fr}
+    .close{grid-template-columns:1fr; gap:22px; padding:26px 24px}
+    .recap{border-left:0; border-top:1px solid var(--border); padding-left:0; padding-top:20px}
+    .card{grid-template-columns:1fr} .evi{grid-column:1; grid-row:auto; min-width:0; margin-top:6px}
+    .asset{flex-direction:column; align-items:flex-start; gap:12px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HERO -->
+  <header class="hero">
+    <div>
+      <span class="eyebrow">Google Ads account scan</span>
+      <h1>Your ads are running.<br>So is a <span class="red">leak</span> inside the same account.</h1>
+      <p class="sub">You pay for clicks every day. Before you spend another dollar, here are <b>three things draining that budget right now</b>, and the one asset already working for you.</p>
+      <div class="for">Prepared for Affordable Moving Services &middot; Rochester Hills, MI</div>
+    </div>
+
+    <div class="scan">
+      <div class="head">
+        <span>Live account scan</span>
+        <span class="live"><span class="pulse"></span>Complete</span>
+      </div>
+      <div class="row"><span class="dot r"></span><span class="k">Website integrity</span><span class="v r">3 unknown scripts</span></div>
+      <div class="row"><span class="dot r"></span><span class="k">Cost per lead</span><span class="v r">Not the real number</span></div>
+      <div class="row"><span class="dot r"></span><span class="k">Account setup</span><span class="v r">Stacked and split</span></div>
+      <div class="row"><span class="dot g"></span><span class="k">Google profile</span><span class="v g">4.6&#9733; &middot; 210 reviews</span></div>
+    </div>
+  </header>
+
+  <!-- THREE LEAKS -->
+  <section>
+    <div class="lead">Where the budget is leaking</div>
+    <h2 class="sec">Three things quietly working against your spend</h2>
+    <div class="cards">
+
+      <div class="card">
+        <h3>Hidden scripts are riding on your traffic</h3>
+        <p>Your website is loading <b>unknown third party scripts on every visit</b>, including the visitors you are paying Google to send. This is the kind of thing that burns paid clicks and can put your site on the wrong side of Google. Removing the visible lines is not enough on its own. The way in has to be found and closed, or they can return.</p>
+        <div class="evi">
+          <span class="tag">&lt;script src="https://n&bull;&bull;&bull;&bull;m.com/traffic/api"&gt;</span>
+          <span class="more">+ 2 more found on the live site</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Your cost per lead is not the real number</h3>
+        <p>A lead is being counted the moment someone lands on your site, <b>before they ever call or message</b>. So visits that were never real customers are logged as leads. The cost per lead you see looks better than the truth, and Google is spending your budget chasing more of the wrong visits.</p>
+      </div>
+
+      <div class="card">
+        <h3>Too many hands, no clean record</h3>
+        <p>Your account carries <b>several tracking and ad setups stacked over the years</b>, plus more than one login with full access to your site. Your numbers are counted twice in places and no one owns the data cleanly. On its own, that makes the reports you rely on hard to trust.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ASSET -->
+  <section>
+    <div class="asset">
+      <div class="big">4.6&#9733;<small>210 reviews</small></div>
+      <p>Not everything here is broken. Your <b>Google Business Profile</b> is real trust that people already gave you, and it is the strongest thing the paid strategy gets built on. This is a foundation to grow, not a start from zero.</p>
+    </div>
+  </section>
+
+  <!-- BEFORE / AFTER -->
+  <section>
+    <div class="lead">What changes once the leaks are closed</div>
+    <div class="ba">
+      <div class="col today">
+        <div class="lbl">Today</div>
+        <ul>
+          <li>Paid clicks <b>shared with unknown scripts</b></li>
+          <li>A cost per lead you <b>cannot trust</b></li>
+          <li>Budget spent on <b>visits that never book</b></li>
+          <li>Data <b>split across stacked accounts</b></li>
+        </ul>
+      </div>
+      <div class="col after">
+        <div class="lbl">After the cleanup</div>
+        <ul>
+          <li>A clean site, <b>every paid click lands where it should</b></li>
+          <li>A <b>true cost per lead</b> you can act on</li>
+          <li>Budget aimed only at <b>people ready to book a move</b></li>
+          <li><b>One account you fully own</b>, one clear number</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ORDER -->
+  <section>
+    <div class="lead">The order I work in</div>
+    <h2 class="sec">Fix the leaks first, then spend</h2>
+    <div class="steps">
+      <div class="step"><div class="n">1</div><div><h3>Secure the foundation</h3><p>Clean the site and lock down access so <b>no spend ever runs on a compromised page</b>.</p></div></div>
+      <div class="step"><div class="n">2</div><div><h3>Rebuild measurement</h3><p>So a lead means a <b>real call or message</b>, and your cost per lead is finally honest.</p></div></div>
+      <div class="step"><div class="n">3</div><div><h3>Cut the waste</h3><p>Stop the budget going to searches and clicks that <b>never turn into a booked move</b>.</p></div></div>
+      <div class="step"><div class="n">4</div><div><h3>Optimize for booked jobs</h3><p>Aim the spend at <b>ready to move customers in your area</b>, and keep watch every week.</p></div></div>
+    </div>
+  </section>
+
+  <!-- CLOSE -->
+  <div class="close">
+    <div>
+      <h2>This is what a short look from the outside found.</h2>
+      <p>The full picture, and <b>exactly where each of these sits inside your account</b>, is where the real work starts. Every one of these is fixable, and fixing them is what turns your ad budget into booked moves instead of wasted clicks.</p>
+    </div>
+    <div class="recap">
+      <div class="recap-row"><span class="rn red">3</span><span>leaks draining your spend</span></div>
+      <div class="recap-row"><span class="rn green">1</span><span>asset to build on</span></div>
+      <div class="recap-note">Fix the leaks first, then every dollar works.</div>
+    </div>
+  </div>
+
+  <footer>Prepared for Affordable Moving Services &middot; Rochester Hills, MI</footer>
+
+</div>
+</body>
+</html>
